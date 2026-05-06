@@ -2,11 +2,20 @@
 
 Panel dinámico de información institucional diseñado para pantallas públicas (TVs) en establecimientos educacionales. Muestra en tiempo real: clima, horarios escolares, pronóstico del tiempo y carrusel de imágenes.
 
-**[Visualizar Proyecto](https://github.com/Pedro-Fernandez-M/Televisores-Establecimiento)**
+**[🔗 Ver en Vivo](https://industrialfenner.cl/reloj/)** | **[📂 Repositorio GitHub](https://github.com/Pedro-Fernandez-M/Televisores-Establecimiento)**
 
 ---
 
-## 🎯 Características Principales
+## � Demo en Vivo
+
+El panel está actualmente en funcionamiento en:  
+### 🌐 **[https://industrialfenner.cl/reloj/](https://industrialfenner.cl/reloj/)**
+
+Puedes ver en tiempo real cómo funciona el sistema en el Liceo Bicentenario Industrial Ingeniero Ricardo Fenner Ruedi.
+
+---
+
+## �🎯 Características Principales
 
 ✨ **Información en Tiempo Real**
 - Clima actual y pronóstico de 5 días
