@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel Institucional</title>
+    <style>
+        /* Base reset */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { font-size:18px; }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; cursor:none; overflow:hidden; }
+        /* hide scrollbars on webkit browsers (TVs often based on chromium) */
+        body::-webkit-scrollbar { display:none; }
+        .container { display:grid; grid-template-columns:1fr 2fr 1fr; gap:20px; padding:20px; max-width:1400px; width:90vw; margin:0 auto; min-height:100vh; grid-template-rows:auto 1fr auto; }
+        .header { grid-column:1/-1; background:rgba(255,255,255,0.95); border-radius:15px; padding:20px 28px; box-shadow:0 8px 32px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:space-between; gap:20px; }
+        .header-logos { display:flex; gap:12px; flex-shrink:0; }
+        .header-logo { width:80px; height:80px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.8); border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.08); padding:6px; position:relative; overflow:hidden; }
+        @media(min-width:1920px){ .header-logo { width:120px; height:120px; } }
+        /* Logo fallback when image fails */
+        .header-logo.img-failed img{display:none;}
+        .header-logo.img-failed::after{content:attr(data-text); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:700; color:#2d3748; padding:8px; text-align:center;}
+
+        /* Header controls removed for fixed TV deployment */
+        .header-logo img { max-width:100%; max-height:100%; object-fit:contain; }
+        .header-content { flex:1; text-align:center; }
+        .header h1 { color:#4a5568; font-size:1.85rem; font-weight:300; line-height:1.3; }
+        .widget { background:rgba(255,255,255,0.95); border-radius:15px; padding:28px 24px; box-shadow:0 8px 32px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px; }
+        .widget h3 { color:#4a5568; font-size:1.15rem; text-align:center; margin-bottom:6px; }
+        .temperature { font-size:3.5rem; font-weight:bold; color:#2d3748; text-align:center; line-height:1; }
+        .weather-desc { color:#718096; font-size:1rem; text-transform:capitalize; text-align:center; }
+        .weather-location { color:#4a5568; font-size:0.85rem; font-weight:500; text-align:center; }
+        .weather-details { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; font-size:0.85rem; color:#4a5568; }
+        .uv-indicator { padding:3px 10px; border-radius:8px; font-weight:600; display:inline-block; }
+        .uv-low{background:#86efac;color:#166534;} .uv-moderate{background:#fde047;color:#713f12;} .uv-high{background:#fb923c;color:#7c2d12;} .uv-very-high{background:#ef4444;color:#fff;} .uv-extreme{background:#a855f7;color:#fff;}
+        .forecast-day { display:flex; justify-content:space-between; align-items:center; padding:9px 12px; background:rgba(102,126,234,0.07); border-radius:10px; font-size:0.9rem; }
+        .forecast-day-name { font-weight:600; color:#4a5568; min-width:42px; }
+        .forecast-desc { color:#718096; font-size:0.78rem; flex:1; text-align:center; text-transform:capitalize; }
+        .forecast-max { font-weight:bold; color:#2d3748; } .forecast-min { color:#718096; font-size:0.8rem; }
+        .time-display { font-size:3rem; font-weight:bold; color:#2d3748; font-family:'Courier New',monospace; text-align:center; letter-spacing:2px; }
+        .date-display { color:#718096; font-size:0.9rem; text-align:center; }
+        .school-status { margin-top:10px; padding:10px 16px; border-radius:10px; font-size:0.95rem; font-weight:600; text-align:center; color:white; }
+        .school-status.clases{background:linear-gradient(135deg,#4299e1,#3182ce);} .school-status.recreo{background:linear-gradient(135deg,#48bb78,#38a169);} .school-status.desayuno{background:linear-gradient(135deg,#ed8936,#dd6b20);} .school-status.almuerzo{background:linear-gradient(135deg,#9f7aea,#805ad5);} .school-status.fuera-horario{background:linear-gradient(135deg,#718096,#4a5568);} .school-status.fin-semana{background:linear-gradient(135deg,#38b2ac,#319795);}
+        .footer { grid-column:1/-1; background:rgba(255,255,255,0.95); border-radius:15px; padding:10px; box-shadow:0 8px 32px rgba(0,0,0,0.1); text-align:center; color:#718096; font-size:0.8rem; }
+        .loading { display:block; width:22px; height:22px; border:3px solid #f3f3f3; border-top:3px solid #667eea; border-radius:50%; animation:spin 1s linear infinite; margin:10px auto; }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        @media(max-width:900px){.container{grid-template-columns:1fr 1fr;}}
+        @media(max-width:600px){.container{grid-template-columns:1fr;padding:10px;gap:12px;} .header{flex-direction:column;} .header h1{font-size:1.3rem;} .time-display{font-size:2.2rem;} .temperature{font-size:2.8rem;}}
+        /* scale up for very large (TV) screens */
+        @media(min-width:1920px){ html { font-size:22px; } }
+        @media(min-width:2560px){ html { font-size:26px; } }
+        /* Announcement bar */
+        .announcement{grid-column:1/-1;background:rgba(255,255,255,0.95);border-radius:12px;padding:8px 14px;box-shadow:0 6px 20px rgba(0,0,0,0.06);overflow:hidden;display:flex;align-items:center}
+        .ann-wrap{white-space:nowrap;display:inline-block;animation:marquee 18s linear infinite}
+        @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+        /* Accessibility modes */
+        body.high-contrast{background:linear-gradient(135deg,#1f2937,#0f172a);} 
+        body.high-contrast .widget, body.high-contrast .header, body.high-contrast .footer, body.high-contrast .announcement{background:#000;color:#fff}
+        body.large-text{font-size:1.15rem}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="header-logos">
+            <div class="header-logo" data-text="Insignia Liceo"><img src="LOGO2.png" alt="Insignia Liceo" onerror="this.parentElement.classList.add('img-failed')"></div>
+        </div>
+        <div class="header-content">
+            <h1>🎓 Liceo Bicentenario Industrial Ingeniero Ricardo Fenner Ruedi 🎓</h1>
+        </div>
+        <!-- header controls removed (fixed TV - no button interaction) -->
+        <div class="header-logos">
+            <div class="header-logo" data-text="SNA Educa"><img src="LOGO1.png" alt="SNA Educa" onerror="this.parentElement.classList.add('img-failed')"></div>
+            <div class="header-logo" data-text="Centro de Innovación"><img src="LOGO3.png" alt="Centro de Innovación" onerror="this.parentElement.classList.add('img-failed')"></div>
+        </div>
+    </header>
+
+    <div class="widget">
+        <h3>🌤 Clima Actual</h3>
+        <div id="weatherInfo"><span class="loading"></span></div>
+        <h3 style="margin-top:10px;">📅 Próximos Días</h3>
+        <div id="forecastInfo"><span class="loading"></span></div>
+    </div>
+
+    <div class="widget">
+        <div id="slideshowContainer" style="flex:1; display:flex; align-items:center; justify-content:center;"></div>
+    </div>
+
+    <div class="widget" style="justify-content:center;">
+        <h3>🕐 Hora Chile</h3>
+        <div class="time-display" id="timeDisplay">--:--:--</div>
+        <div class="date-display" id="dateDisplay">cargando...</div>
+        <div class="school-status" id="schoolStatus">Cargando...</div>
+    </div>
+
+    <footer class="footer">Panel Institucional — Liceo Bicentenario Industrial Ingeniero Ricardo Fenner Ruedi — La Unión</footer>
+</div>
+<script>
+const SCHED={weekdays:{'07:00-08:18':{activity:'Desayuno',icon:'🍞',cls:'desayuno'},'08:19-09:49':{activity:'En Clases',icon:'📚',cls:'clases'},'09:50-10:10':{activity:'En Recreo',icon:'⏰',cls:'recreo'},'10:11-11:39':{activity:'En Clases',icon:'📚',cls:'clases'},'11:40-11:49':{activity:'En Recreo',icon:'⏰',cls:'recreo'},'11:50-13:19':{activity:'En Clases',icon:'📚',cls:'clases'},'13:20-14:00':{activity:'Almuerzo',icon:'🍽',cls:'almuerzo'},'14:05-15:34':{activity:'En Clases',icon:'📚',cls:'clases'},'15:35-15:49':{activity:'En Recreo',icon:'⏰',cls:'recreo'},'15:50-17:20':{activity:'En Clases',icon:'📚',cls:'clases'}},weekend:{activity:'Fin de Semana',icon:'🏠',cls:'fin-semana'},afterHours:{activity:'Fin del Día Escolar',icon:'🌅',cls:'fuera-horario'}};
+function tm(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function getStatus(chile){const d=chile.getDay();if(d===0||d===6)return SCHED.weekend;const c=chile.toTimeString().slice(0,5);for(const[r,s]of Object.entries(SCHED.weekdays)){const[a,b]=r.split('-');if(tm(c)>=tm(a)&&tm(c)<tm(b))return s;}return SCHED.afterHours;}
+function updateClock(){const chile=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Santiago'}));document.getElementById('timeDisplay').textContent=chile.toLocaleTimeString('es-CL',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});const ds=chile.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});document.getElementById('dateDisplay').textContent=ds.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');const s=getStatus(chile);const el=document.getElementById('schoolStatus');el.textContent=s.icon+' '+s.activity;el.className='school-status '+s.cls;}
+async function getWeather(){try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-40.2931&longitude=-73.0817&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=uv_index&timezone=America/Santiago');const d=await r.json();if(!d.current){err('weatherInfo');return;}const uv=d.hourly.uv_index[new Date().getHours()]??0;const uvL=uvLevel(uv);document.getElementById('weatherInfo').innerHTML=`<div class="temperature">${Math.round(d.current.temperature_2m)}°C</div><div class="weather-desc">${wDesc(d.current.weather_code)}</div><div class="weather-location">📍 La Unión, Chile</div><div class="weather-details"><div>🌡 Sensación: ${Math.round(d.current.apparent_temperature)}°C</div><div>💧 Humedad: ${d.current.relative_humidity_2m}%</div><div>💨 Viento: ${Math.round(d.current.wind_speed_10m)} km/h</div><div>🌧 Precipitación: ${d.current.precipitation} mm</div><div style="grid-column:1/-1;text-align:center;margin-top:6px;">☀️ UV: <span class="uv-indicator ${uvL.cls}">${Math.round(uv*10)/10} — ${uvL.level}</span></div></div>`;}catch{err('weatherInfo');}}
+async function getForecast(){try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-40.2931&longitude=-73.0817&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America/Santiago&forecast_days=5');const d=await r.json();if(!d.daily){err('forecastInfo');return;}const dn=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];let h='';for(let i=1;i<5;i++){const day=new Date(d.daily.time[i]);h+=`<div class="forecast-day"><div class="forecast-day-name">${dn[day.getDay()]}</div><div class="forecast-desc">${wDesc(d.daily.weather_code[i])}</div><div style="display:flex;gap:8px;"><span class="forecast-max">${Math.round(d.daily.temperature_2m_max[i])}°</span><span class="forecast-min">${Math.round(d.daily.temperature_2m_min[i])}°</span></div></div>`;}document.getElementById('forecastInfo').innerHTML=h;}catch{err('forecastInfo');}}
+function err(id){document.getElementById(id).innerHTML='<div style="color:#718096;text-align:center;padding:10px;">Sin conexión</div>';}
+function wDesc(c){return{0:'Despejado',1:'Principalmente despejado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',48:'Niebla con escarcha',51:'Llovizna ligera',53:'Llovizna moderada',55:'Llovizna densa',61:'Lluvia ligera',63:'Lluvia moderada',65:'Lluvia intensa',71:'Nevada ligera',73:'Nevada moderada',75:'Nevada intensa',77:'Granizo',80:'Chubascos ligeros',81:'Chubascos moderados',82:'Chubascos violentos',85:'Nevadas ligeras',86:'Nevadas intensas',95:'Tormenta',96:'Tormenta con granizo ligero',99:'Tormenta con granizo intenso'}[c]||'Desconocido';}
+function uvLevel(uv){if(uv<=2)return{level:'Bajo',cls:'uv-low'};if(uv<=5)return{level:'Moderado',cls:'uv-moderate'};if(uv<=7)return{level:'Alto',cls:'uv-high'};if(uv<=10)return{level:'Muy Alto',cls:'uv-very-high'};return{level:'Extremo',cls:'uv-extreme'};}
+// Announcements and accessibility toggles
+const ANNOUNCEMENTS=[
+    "🎉 Bienvenidos al Liceo Bicentenario Industrial — La Unión",
+    "📢 Acto cívico hoy 10:00 en patio central",
+    "⚠️ Semana de ensayos: Cambios de horario en talleres"
+];
+let annIdx=0;
+function showAnnouncement(i){const el=document.getElementById('annWrap'); if(!el) return; el.textContent=ANNOUNCEMENTS[i%ANNOUNCEMENTS.length];}
+function cycleAnnouncements(){annIdx=(annIdx+1)%ANNOUNCEMENTS.length; showAnnouncement(annIdx);}
+setInterval(cycleAnnouncements,8000);
+showAnnouncement(0);
+// accessibility toggles removed for fixed TV deployment (no physical interaction expected)
+
+const media = [
+    {type: 'image', src: 'imagenes/1.jpg'},
+    {type: 'image', src: 'imagenes/2.jpg'},
+     {type: 'image', src: 'imagenes/imagen 6.png'},
+     {type: 'image', src: 'imagenes/imagen 7.png'},
+     {type: 'image', src: 'imagenes/inclusion.png'},
+    {type: 'image', src: 'imagenes/¡MucFehas.png'},
+    {type: 'video', src: 'videos/caida1.mp4'},
+    {type: 'video', src: 'videos/caida 2.mp4'},
+    {type: 'video', src: 'videos/caida 3.mp4'},
+    {type: 'video', src: 'videos/caida 4.mp4'},
+    {type: 'video', src: 'videos/hhhh_0.webm'},
+    {type: 'video', src: 'videos/seguridad1_0.mp4'},
+     {type: 'video', src: 'videos/video 1.webm'},
+     {type: 'video', src: 'videos/video 2.webm'},
+     {type: 'video', src: 'videos/video 3.webm'},
+     {type: 'video', src: 'videos/video 5.webm'},
+     {type: 'video', src: 'videos/video 6.webm'},
+];
+let currentIndex = 0;
+let timeoutId = null;
+
+function showNoMedia() {
+    const container = document.getElementById('slideshowContainer');
+    if (!container) return;
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+    }
+    container.innerHTML = '<div style="color:#718096;text-align:center;">Sin contenido multimedia disponible</div>';
+}
+
+function handleVideoFailure(reason) {
+    console.warn('Video failed:', reason || 'unknown reason');
+    timeoutId = setTimeout(nextMedia, 1000);
+}
+
+function addVideo(src) {
+    if (!src || typeof src !== 'string') return;
+    media.push({type: 'video', src: src.trim()});
+    if (media.length === 1) {
+        currentIndex = 0;
+        showMedia(0);
+    }
+}
+
+function removeVideo(src) {
+    const idx = media.findIndex(item => item.type === 'video' && item.src === src);
+    if (idx === -1) return false;
+    media.splice(idx, 1);
+    if (!media.length) {
+        showNoMedia();
+        return true;
+    }
+    if (currentIndex >= media.length) currentIndex = 0;
+    showMedia(currentIndex);
+    return true;
+}
+
+function setMediaList(list) {
+    if (!Array.isArray(list)) return false;
+
+    const normalized = list
+        .filter(item => item && (item.type === 'image' || item.type === 'video') && typeof item.src === 'string' && item.src.trim())
+        .map(item => ({type: item.type, src: item.src.trim()}));
+
+    media.splice(0, media.length, ...normalized);
+    currentIndex = 0;
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+    }
+    if (!media.length) {
+        showNoMedia();
+        return true;
+    }
+    showMedia(0);
+    return true;
+}
+
+window.addVideo = addVideo;
+window.removeVideo = removeVideo;
+window.setMediaList = setMediaList;
+
+function showMedia(index) {
+    const container = document.getElementById('slideshowContainer');
+    if (!container) return;
+    if (!media.length) {
+        showNoMedia();
+        return;
+    }
+
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+    }
+
+    currentIndex = (index + media.length) % media.length;
+
+    const item = media[currentIndex];
+
+    if (item.type === 'image') {
+        container.innerHTML = `<img src="${item.src}" alt="Imagen institucional" style="max-width:88%; max-height:88%; object-fit:contain;">`;
+        const image = container.querySelector('img');
+        image.addEventListener('error', () => {
+            handleVideoFailure('image load error');
+        }, {once: true});
+        timeoutId = setTimeout(nextMedia, 10000);
+    } else {
+        container.innerHTML = `<div style="color:#718096;text-align:center;">Cargando video...</div><video src="${item.src}" playsinline autoplay preload="metadata" style="max-width:100%; max-height:100%; object-fit:contain;"></video>`;
+        const video = container.querySelector('video');
+        let started = false;
+
+        timeoutId = setTimeout(() => {
+            if (!started) handleVideoFailure('video load timeout');
+        }, 15000);
+
+        const onReady = () => {
+            started = true;
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            const msg = container.querySelector('div');
+            if (msg) msg.remove();
+            video.defaultMuted = false;
+            video.muted = false;
+            video.volume = 1;
+            video.play().catch(() => {});
+        };
+
+        video.addEventListener('loadeddata', onReady, {once: true});
+        video.addEventListener('canplay', onReady, {once: true});
+
+        video.addEventListener('playing', () => {
+            const msg = container.querySelector('div');
+            if (msg) msg.remove();
+        }, {once: true});
+
+        video.addEventListener('error', () => {
+            handleVideoFailure('video playback error');
+        }, {once: true});
+
+        video.addEventListener('ended', nextMedia, {once: true});
+    }
+}
+function nextMedia() {
+    if (!media.length) {
+        showNoMedia();
+        return;
+    }
+    currentIndex = (currentIndex + 1) % media.length;
+    showMedia(currentIndex);
+}
+showMedia(0);
+
+updateClock();getWeather();getForecast();
+
+// try to enter fullscreen when the page loads or when the user interacts
+function requestFull(){const el=document.documentElement; if(el.requestFullscreen) el.requestFullscreen().catch(()=>{}); else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();}
+window.addEventListener('load',requestFull);
+// some TVs require a user gesture, so also request on first click/touch
+window.addEventListener('click',requestFull);
+
+setInterval(updateClock,1000);setInterval(getWeather,120000);setInterval(getForecast,600000);
+</script>
+</body>
+</html>
