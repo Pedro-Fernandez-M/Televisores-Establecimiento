@@ -17,7 +17,7 @@
         .header-logo { width:80px; height:80px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.8); border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.08); padding:6px; position:relative; overflow:hidden; }
         @media(min-width:1920px){ .header-logo { width:120px; height:120px; } }
         /* Logo fallback when image fails */
-        .header-logo.img-failed img{display:none;}
+        .header-logo.img-failed img{display:none;};
         .header-logo.img-failed::after{content:attr(data-text); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:700; color:#2d3748; padding:8px; text-align:center;}
 
         /* Header controls removed for fixed TV deployment */
@@ -37,7 +37,7 @@
         .forecast-desc { color:#718096; font-size:0.78rem; flex:1; text-align:center; text-transform:capitalize; }
         .forecast-max { font-weight:bold; color:#2d3748; } .forecast-min { color:#718096; font-size:0.8rem; }
         .time-display { font-size:3rem; font-weight:bold; color:#2d3748; font-family:'Courier New',monospace; text-align:center; letter-spacing:2px; }
-        .date-display { color:#718096; font-size:0.9rem; text-align:center; }
+        .date-display { color:#54719d; font-size:0.9rem; text-align:center; }
         .school-status { margin-top:10px; padding:10px 16px; border-radius:10px; font-size:0.95rem; font-weight:600; text-align:center; color:white; }
         .school-status.clases{background:linear-gradient(135deg,#4299e1,#3182ce);} .school-status.recreo{background:linear-gradient(135deg,#48bb78,#38a169);} .school-status.desayuno{background:linear-gradient(135deg,#ed8936,#dd6b20);} .school-status.almuerzo{background:linear-gradient(135deg,#9f7aea,#805ad5);} .school-status.fuera-horario{background:linear-gradient(135deg,#718096,#4a5568);} .school-status.fin-semana{background:linear-gradient(135deg,#38b2ac,#319795);}
         .footer { grid-column:1/-1; background:rgba(255,255,255,0.95); border-radius:15px; padding:10px; box-shadow:0 8px 32px rgba(0,0,0,0.1); text-align:center; color:#718096; font-size:0.8rem; }
