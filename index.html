@@ -17,7 +17,7 @@
         .header-logo { width:80px; height:80px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.8); border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.08); padding:6px; position:relative; overflow:hidden; }
         @media(min-width:1920px){ .header-logo { width:120px; height:120px; } }
         /* Logo fallback when image fails */
-        .header-logo.img-failed img{display:none;};
+        .header-logo.img-failed img{display:none;}
         .header-logo.img-failed::after{content:attr(data-text); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:700; color:#2d3748; padding:8px; text-align:center;}
 
         /* Header controls removed for fixed TV deployment */
